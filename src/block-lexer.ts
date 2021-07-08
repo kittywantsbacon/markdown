@@ -43,8 +43,8 @@ export class BlockLexer<T extends typeof BlockLexer> {
   protected hasRulesGfm!: boolean;
   protected hasRulesTables!: boolean;
 
-  constructor(protected staticThis: typeof BlockLexer, options?: object) {
-    this.options = options || Marked.options;
+  constructor(protected staticThis: typeof BlockLexer, options: object) {
+    this.options = options;
     this.setRules();
   }
 
@@ -56,7 +56,7 @@ export class BlockLexer<T extends typeof BlockLexer> {
    */
   static lex(
     src: string,
-    options?: MarkedOptions,
+    options: MarkedOptions,
     top?: boolean,
     isBlockQuote?: boolean,
   ): LexerReturns {

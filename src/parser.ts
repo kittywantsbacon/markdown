@@ -31,14 +31,14 @@ export class Parser {
   protected renderer: Renderer;
   protected line: number = 0;
 
-  constructor(options?: MarkedOptions) {
+  constructor(options: MarkedOptions) {
     this.tokens = [];
     this.token = undefined;
-    this.options = options || Marked.options;
+    this.options = options;
     this.renderer = this.options.renderer || new Renderer(this.options);
   }
 
-  static parse(tokens: Token[], links: Links, options?: MarkedOptions): string {
+  static parse(tokens: Token[], links: Links, options: MarkedOptions): string {
     const parser = new this(options);
     return parser.parse(links, tokens);
   }

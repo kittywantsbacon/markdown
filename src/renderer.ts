@@ -14,8 +14,8 @@ import { Marked } from "./marked.ts";
 export class Renderer {
   protected options: MarkedOptions;
 
-  constructor(options?: MarkedOptions) {
-    this.options = options || Marked.options;
+  constructor(options: MarkedOptions) {
+    this.options = options;
   }
 
   code(code: string, lang?: string, escaped?: boolean): string {

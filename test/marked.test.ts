@@ -1,8 +1,9 @@
 import { Marked, MarkedOptions } from "../mod.ts";
 import { assertEquals } from "./deps.ts";
 
-const HTMLDIR = "./tests/html";
-const MDDIR = "./tests/md";
+const __dirname = new URL('.', import.meta.url).pathname;
+const HTMLDIR = __dirname + "/tests/html";
+const MDDIR = __dirname + "/tests/md";
 
 const tests = Deno.readDirSync(HTMLDIR);
 
@@ -29,8 +30,7 @@ for (const t of tests) {
                 }
               }
             }
-            Marked.setOptions(options);
-            const actual = Marked.parse(md).content;
+            const actual = Marked.parse(md, options).content;
             assertEquals(actual, html);
         }
     });

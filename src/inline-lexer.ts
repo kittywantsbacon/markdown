@@ -52,7 +52,7 @@ export class InlineLexer {
   constructor(
     protected staticThis: typeof InlineLexer,
     protected links: Links,
-    protected options: MarkedOptions = Marked.options,
+    protected options: MarkedOptions,
     renderer?: Renderer,
   ) {
     this.renderer = renderer || this.options.renderer ||

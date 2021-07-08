@@ -21,29 +21,16 @@ import {
 } from "./interfaces.ts";
 import { Parser } from "./parser.ts";
 
-export class Marked {
-  static options = new MarkedOptions();
-  protected static simpleRenderers: SimpleRenderer[] = [];
-
-  /**
-   * Merges the default options with options that will be set.
-   *
-   * @param options Hash of options.
-   */
-  static setOptions(options: MarkedOptions) {
-    Object.assign(this.options, options);
-    return this;
-  }
+export const Marked = {
 
   /**
    * Setting simple block rule.
    */
-  static setBlockRule(regexp: RegExp, renderer: SimpleRenderer = () => "") {
+  setBlockRule(regexp: RegExp) {
     BlockLexer.simpleRules.push(regexp);
-    this.simpleRenderers.push(renderer);
 
     return this;
-  }
+  },
 
   /**
    * Accepts Markdown text and returns an object containing HTML and metadata.
@@ -52,18 +39,18 @@ export class Marked {
    * @param options Hash of options. They replace, but do not merge with the default options.
    * If you want the merging, you can to do this via `Marked.setOptions()`.
    */
-  static parse(src: string, options: MarkedOptions = this.options): Parsed {
+  parse(src: string, options: MarkedOptions = new MarkedOptions()): Parsed {
     const result = new Parsed();
     try {
-      const { tokens, links, meta } = this.callBlockLexer(src, options);
-      result.content = this.callParser(tokens, links, options);
+      const { tokens, links, meta } = this._callBlockLexer(src, options);
+      result.content = this._callParser(tokens, links, options);
       result.meta = meta;
       return result;
     } catch (e) {
-      result.content = this.callMe(e);
+      result.content = this._callMe(e, options);
       return result;
     }
-  }
+  },
 
   /**
    * Accepts Markdown text and returns object with text in HTML format,
@@ -73,14 +60,15 @@ export class Marked {
    * @param options Hash of options. They replace, but do not merge with the default options.
    * If you want the merging, you can to do this via `Marked.setOptions()`.
    */
-  static debug(
+  debug(
     src: string,
-    options: MarkedOptions = this.options,
+    options: MarkedOptions = new MarkedOptions(),
+    renderers: SimpleRenderer[] = [],
   ): DebugReturns {
-    const { tokens, links, meta } = this.callBlockLexer(src, options);
+    const { tokens, links, meta } = this._callBlockLexer(src, options);
     let origin = tokens.slice();
     const parser = new Parser(options);
-    parser.simpleRenderers = this.simpleRenderers;
+    parser.simpleRenderers = renderers;
     const result = parser.debug(links, tokens);
 
     /**
@@ -100,11 +88,11 @@ export class Marked {
     });
 
     return { tokens: origin, links, meta, result};
-  }
+  },
 
-  protected static callBlockLexer(
+  _callBlockLexer(
     src: string = "",
-    options?: MarkedOptions,
+    options: MarkedOptions,
   ): LexerReturns {
     if (typeof src != "string") {
       throw new Error(
@@ -121,31 +109,32 @@ export class Marked {
       .replace(/^ +$/gm, "");
 
     return BlockLexer.lex(src, options, true);
-  }
+  },
 
-  protected static callParser(
+  _callParser(
     tokens: Token[],
     links: Links,
-    options?: MarkedOptions,
+    options: MarkedOptions,
+    renderers: SimpleRenderer[] = []
   ): string {
-    if (this.simpleRenderers.length) {
+    if (renderers.length) {
       const parser = new Parser(options);
-      parser.simpleRenderers = this.simpleRenderers;
+      parser.simpleRenderers = renderers;
       return parser.parse(links, tokens);
     } else {
       return Parser.parse(tokens, links, options);
     }
-  }
+  },
 
-  protected static callMe(err: Error) {
+  _callMe(err: Error, options: MarkedOptions) {
     err.message +=
       "\nPlease report this to https://github.com/ts-stack/markdown";
 
-    if (this.options.silent && this.options.escape) {
+    if (options.silent && options.escape) {
       return "<p>An error occured:</p><pre>" +
-        this.options.escape(err.message + "", true) + "</pre>";
+        options.escape(err.message + "", true) + "</pre>";
     }
 
     throw err;
   }
-}
+};
